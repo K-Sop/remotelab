@@ -1,1 +1,34 @@
-<!DOCTYPE html>2<html lang="ja">3<head>4<meta charset="utf-8">5<meta name="viewport" content="width=device-width,initial-scale=1">6<title>RemoteLab Camera Test</title>7</head>8<body>9<h1>RemoteLab カメラテスト</h1>10 11<button id="start">開始</button>12 13<p id="status">待機中</p>14 15<video id="video"16       autoplay17       playsinline18       muted19       style="width:100%;max-width:500px;background:black;">20</video>21 22<script>23document.getElementById('start').onclick = async () => {24    try {25        const stream =26            await navigator.mediaDevices.getUserMedia({27                video:true,28                audio:true29            });30 31        document.getElementById('video').srcObject = stream;32 33        document.getElementById('status').textContent =34            '成功：カメラ・マイク取得完了';35    }36    catch(e){37        document.getElementById('status').textContent =38            '失敗：' + e.name;39    }40};41</script>42 43</body>44</html>その他の行を表示
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RemoteLab Camera Test</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:800px;margin:20px auto;padding:20px}
+button{font-size:1.2rem;padding:12px 24px}
+video{width:100%;max-width:700px;background:#000;border-radius:8px;margin-top:12px}
+#status{margin-top:12px;padding:10px;background:#eef}
+</style>
+</head>
+<body>
+<h1>RemoteLab カメラ・マイク テスト</h1>
+<p>iPadで開き、「開始」を押してください。</p>
+<button id="start">開始</button>
+<div id="status">待機中</div>
+<video id="video" autoplay playsinline muted></video>
+<script>
+document.getElementById('start').addEventListener('click', async ()=>{
+ const status=document.getElementById('status');
+ try{
+   status.textContent='カメラ・マイク取得中...';
+   const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+   document.getElementById('video').srcObject=stream;
+   status.textContent='成功: カメラ・マイク取得完了';
+ }catch(e){
+   status.textContent='失敗: '+e.name+' / '+e.message;
+ }
+});
+</script>
+</body>
+</html>
