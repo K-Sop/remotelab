@@ -3,32 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RemoteLab Camera Test</title>
+<title>RemoteLab Audio Video Test</title>
 <style>
 body{font-family:Arial,sans-serif;max-width:800px;margin:20px auto;padding:20px}
-button{font-size:1.2rem;padding:12px 24px}
-video{width:100%;max-width:700px;background:#000;border-radius:8px;margin-top:12px}
-#status{margin-top:12px;padding:10px;background:#eef}
+button{font-size:20px;padding:10px 20px}
+video{width:100%;max-width:600px;background:black;margin-top:10px}
+#meter{width:100%;height:30px;background:#ddd;border-radius:15px;overflow:hidden;margin-top:15px}
+#bar{height:100%;width:0%;background:#4caf50}
+#status{margin-top:10px}
 </style>
 </head>
 <body>
-<h1>RemoteLab カメラ・マイク テスト</h1>
-<p>iPadで開き、「開始」を押してください。</p>
+<h1>RemoteLab 映像・音声テスト v0.2</h1>
 <button id="start">開始</button>
 <div id="status">待機中</div>
 <video id="video" autoplay playsinline muted></video>
+<h3>マイク入力レベル</h3>
+<div id="meter"><div id="bar"></div></div>
 <script>
-document.getElementById('start').addEventListener('click', async ()=>{
- const status=document.getElementById('status');
+document.getElementById('start').onclick = async ()=>{
  try{
-   status.textContent='カメラ・マイク取得中...';
-   const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-   document.getElementById('video').srcObject=stream;
-   status.textContent='成功: カメラ・マイク取得完了';
+  const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  document.getElementById('video').srcObject = stream;
+  document.getElementById('status').textContent='成功：カメラ・マイク取得完了';
+
+  const ctx = new AudioContext();
+  const src = ctx.createMediaStreamSource(stream);
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 256;
+  src.connect(analyser);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+
+  function update(){
+    analyser.getByteFrequencyData(data);
+    let avg = data.reduce((a,b)=>a+b,0)/data.length;
+    document.getElementById('bar').style.width = Math.min(100,avg)+'%';
+    requestAnimationFrame(update);
+  }
+  update();
  }catch(e){
-   status.textContent='失敗: '+e.name+' / '+e.message;
+  document.getElementById('status').textContent='失敗：'+e.name+' / '+e.message;
  }
-});
+};
 </script>
 </body>
 </html>
